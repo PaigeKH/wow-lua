@@ -14,9 +14,7 @@ local ITEM_IDS = {
 local ZoneLock = require("ap_zone_lock")
 
 local seenLocations = {}
-local seenFilePath = "lua_scripts/data/archipelago_seen_locations.json"
-local progressiveItemTotals = {}
-local itemTotalsPath = "lua_scripts/data/archipelago_item_count.json"
+local progressiveItemTotals = {} 
 
 local GOLD_AMOUNT = {
     [0] =  100 , -- 1s
@@ -58,8 +56,29 @@ local BUFFS = {57294, 72590, 48470, 20217, 48074, 20911, 48936, 17038}
 local DEBUFFS = {7054, 3150, 8137, 16458, 15848, 23170, 15007, 5782, 8014, 6946, 16247}
 local BAGS = {51809, 35874, 41600, 38082, 43345, 49295, 50316, 41599, 35516, 1977, 21876, 50317, 34067, 34845, 33117, 14156, 17966, 22679, 21843, 19914, 27680, 13330, 21841, 20400, 14155, 4500, 11742, 22233, 10959, 10683, 14046, 30744, 3914, 1685, 9587, 11324, 19291, 10050, 1652, 1725, 4499, 38145, 4981, 10051, 1623, 3762, 16057, 932, 4245, 804, 5764, 4497, 5575, 5576, 918, 857, 933, 6446, 3352, 1470, 1729, 5765, 5574, 3343, 4498, 1537, 5573, 5603, 3233, 5763, 6754, 856, 11845, 2657, 4240, 4241, 23852, 6756, 22571, 2082, 4496, 5762, 805, 4930, 5081, 4957, 5571, 828, 5572, 4238, 20474, 23389, 22976, 37606, 30806}
 
+-- Utility to get player items file path
+local function GetItemsPathForPlayer(player)
+    local itemTotalsPath = "lua_scripts/data/archipelago_item_count.json"
+    if player then
+        itemTotalsPath = string.format("lua_scripts/data/archipelago_item_count%d.json", player:GetGUIDLow())
+    end
+    return itemTotalsPath
+end
+
+-- Utility to get player seen locations file path
+local function GetSeenPathForPlayer(player)
+    local seenFilePath = "lua_scripts/data/archipelago_seen_locations.json"
+    if player then
+        seenFilePath = string.format("lua_scripts/data/archipelago_seen_locations%d.json", player:GetGUIDLow())
+    end
+    return seenFilePath
+end
+
 -- Utility to save local data
-local function saveToFile()
+local function saveToFile(player)
+    local itemTotalsPath = GetItemsPathForPlayer(player)
+    local seenFilePath = GetSeenPathForPlayer(player)
+
     local file = io.open(seenFilePath, "w")
     if not file then
         print("[AP-LOC] Failed to open " .. seenFilePath .. " for writing.")
@@ -80,8 +99,11 @@ local function saveToFile()
     file:close()
 end
 
--- Utility to load on startup
-local function loadFiles()
+-- Utility to load on login
+local function loadFiles(player)
+    local itemTotalsPath = GetItemsPathForPlayer(player)
+    local seenFilePath = GetSeenPathForPlayer(player)
+
     local file = io.open(seenFilePath, "r")
     if not file then
         print("[AP-LOC] No seen locations file found.")
@@ -121,8 +143,10 @@ function tablelength(T)
     return count
 end
 
--- Load once when script starts
-loadFiles()
+-- Load data on login
+RegisterPlayerEvent(3, function(_, player)
+    loadFiles(player)
+end)
 
 -- Utility to read itemId
 local function DecodeAPId(id)
@@ -137,26 +161,13 @@ local M = {}
 
 -- Handle received items from AP
 function AP_AddReceivedItem(itemId, fromPlayer, locationId)
-
-    print("AP_AddReceivedItem")
-    print(seenLocations, locationId)
-    print(seenLocations[locationId])
-    print("checked location id")
-
-    name = AP_ItemID_to_Name[itemId]
-    print(name, itemId)
-
     -- Check if this item has been processed already
     if seenLocations[tostring(locationId)] then
-
         print(string.format("[AP-ITEMS] Skipping duplicate location %d (item %d)", locationId, itemId))
         return
     end
 
-    -- Mark this location as seen and save
-    seenLocations[tostring(locationId)] = true
 
-    saveToFile()
 
     local players = GetPlayersInWorld()
     if #players == 0 then
@@ -169,6 +180,10 @@ function AP_AddReceivedItem(itemId, fromPlayer, locationId)
 
     local category, wowId = DecodeAPId(itemId)
     for _, player in pairs(GetPlayersInWorld()) do
+        -- Mark this location as seen and save
+        seenLocations[tostring(locationId)] = true
+        saveToFile(player)
+
         if itemId == 101 then -- victory
             player:CastSpell(player, 483, true)     -- Learn visual
             player:CastSpell(player, 21249, true)   -- Blue glow burst

@@ -8,12 +8,22 @@ XP.allowed_zones = {}
 XP.MAX_LEVEL = 5
 XP.tokens = 0
 XP.stored_xp = {}
-local xp_state_file = "lua_scripts/data/xp_cap.json"
+
 
 -- =========================
 -- Persistence
 -- =========================
-function XP.save()
+
+local function GetPathForPlayer(player)
+    local xp_state_file = "lua_scripts/data/xp_cap.json"
+    if player then
+        xp_state_file = string.format("lua_scripts/data/xp_cap%d.json", player:GetGUIDLow())
+    end
+    return xp_state_file
+end
+
+function XP.save(player)
+    local xp_state_file = GetPathForPlayer(player)
     local f = io.open(xp_state_file, "w+")
     if not f then
         print("[XP-CAP] ERROR: Could not open file for writing:", xp_state_file)
@@ -35,7 +45,8 @@ function XP.save()
     f:close()
 end
 
-function XP.load()
+function XP.load(player)
+    local xp_state_file = GetPathForPlayer(player)
     local f = io.open(xp_state_file, "r")
     if not f then
         print("[XP-CAP] No existing XP state file, starting fresh (all zones locked)")
@@ -90,7 +101,7 @@ end
 local function setStoredXP(player, amount)
     local guid = player:GetGUIDLow()
     XP.stored_xp[guid] = amount
-    XP.save()
+    XP.save(player)
 end
 
 -- =========================
@@ -177,8 +188,8 @@ function XP.AddToken()
     print(string.format("[AP-XP] Token received. Tokens=%d, New cap=%d", XP.tokens, XP.GetCap()))
     for _, player in pairs(GetPlayersInWorld()) do
         GrantLevelToken(player)
+        XP.save(player)
     end
-    XP.save()
 end
 
 RegisterPlayerEvent(3, function(event, player)
@@ -190,10 +201,17 @@ end)
 -- =========================
 -- Startup
 -- =========================
-XP.load()
+
+
+-- Load data on login
+RegisterPlayerEvent(3, function(_, player)
+    XP.load(player)
+end)
 
 CreateLuaEvent(function()
-    XP.save()
+    for _, player in pairs(GetPlayersInWorld()) do
+        XP.save(player)
+    end
 end, 300000, 0) -- save every 5 minutes
 
 RegisterPlayerEvent(12, XP.OnGiveXP)

@@ -110,7 +110,6 @@ local BREADCRUMB_MAP = { -- these quests are unavailable if the next step is com
   [9052] = {9063},
 }
 
-
 -- Save completed locations to file
 local function saveChecks()
     local file = io.open(checksFilePath, "w")
@@ -198,25 +197,26 @@ function CHECKS.completeSpellCheck(player, spellId)
 
     if playerClass == 1 then
         loc = tostring(AP_CATEGORY.WARRIOR) .. tostring(spellId)
-    else if playerClass == 2 then
+    elseif playerClass == 2 then
         loc = tostring(AP_CATEGORY.PALADIN) .. tostring(spellId)
-    else if playerClass == 3 then
+    elseif playerClass == 3 then
         loc = tostring(AP_CATEGORY.HUNTER) .. tostring(spellId)
-    else if playerClass == 4 then
+    elseif playerClass == 4 then
         loc = tostring(AP_CATEGORY.ROGUE) .. tostring(spellId)
-    else if playerClass == 5 then
+    elseif playerClass == 5 then
         loc = tostring(AP_CATEGORY.PRIEST) .. tostring(spellId)
-    else if playerClass == 6 then
+    elseif playerClass == 6 then
         loc = tostring(AP_CATEGORY.DEATHKNIGHT) .. tostring(spellId)
-    else if playerClass == 7 then
+    elseif playerClass == 7 then
         loc = tostring(AP_CATEGORY.SHAMAN) .. tostring(spellId)
-    else if playerClass == 8 then
+    elseif playerClass == 8 then
         loc = tostring(AP_CATEGORY.MAGE) .. tostring(spellId)
-    else if playerClass == 9 then
+    elseif playerClass == 9 then
         loc = tostring(AP_CATEGORY.WARLOCK) .. tostring(spellId)
-    else if playerClass == 11 then
+    elseif playerClass == 11 then
         loc = tostring(AP_CATEGORY.DRUID) .. tostring(spellId)
     end
+
     if loc then
         AP_Checks[loc] = true
         saveChecks()
@@ -226,8 +226,10 @@ function CHECKS.completeSpellCheck(player, spellId)
 end
 
 
+-- Load data on login
+RegisterPlayerEvent(3, function(_, player)
+    loadChecks(player)
+end)
 
--- Run once at startup
-loadChecks()
 
 return CHECKS

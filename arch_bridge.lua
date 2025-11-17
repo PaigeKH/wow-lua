@@ -4,7 +4,6 @@ local BRIDGE_URL = "http://localhost:3000"
 
 local AP = {}
 AP.handlers = {}
-AP.PLAYER_NAME = "PaigeWoW"
 AP_Checks = {}
 
 -- Send a Lua table as JSON
@@ -24,7 +23,7 @@ function AP.sendItem(locationId)
     end
     local packet = {
         cmd = "LocationChecks",
-        locations = { locationId }
+        locations = { tonumber(locationId) }
     }
     print(locationId)
     print(string.format("[AP] Sending item (loc=%s)", locationId))
