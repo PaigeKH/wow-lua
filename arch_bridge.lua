@@ -1,6 +1,5 @@
 -- arch_bridge.lua
 local json = require("json")
-local ap_items = require("AP_ItemIds")
 local BRIDGE_URL = "http://localhost:3000"
 
 local AP = {}
@@ -18,10 +17,9 @@ function AP.send(packet)
 end
 
 -- Helper: send an item to Archipelago
-function AP.sendItem(locationName)
-    local locationId = AP_LocationIds[locationName]
+function AP.sendItem(locationId)
     if not locationId then
-        print("[AP] ERROR: Unknown location name: " .. tostring(locationName))
+        print("[AP] ERROR: Unknown location")
         return
     end
     local packet = {

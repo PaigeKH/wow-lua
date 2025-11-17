@@ -26,6 +26,27 @@ local GOLD_AMOUNT = {
     [4] =  1000000 , -- 100g
 }
 
+AP_CATEGORY = {
+    -- Shared ids
+    BASE = 10,
+    ITEM = 11,
+    QUEST = 12,
+    ZONE = 13,
+    LEVEL = 14,
+    SPELL = 15,
+    -- Class specific spells:
+    WARRIOR = 20,
+    DEATHKNIGHT = 21,
+    PALADIN = 22,
+    HUNTER = 23,
+    SHAMAN = 24,
+    ROGUE = 25,
+    DRUID = 26, 
+    PRIEST = 27,
+    WARLOCK = 28,
+    MAGE = 29
+}
+
 local APPRENTICE = {580, 470, 472, 6648, 458, 6653, 6654, 6777, 6899, 6898, 10873, 8395, 10796, 10799, 10969, 10793, 8394, 10789, 16058, 16059, 16060, 17453, 17454, 17455, 17456, 17458, 17462, 17463, 17464, 18989, 18990, 34406, 34795, 35020, 35022, 35018, 35711, 35710, 43899, 49378, 58983, 64658, 64657, 64977, 66847, 48025, 42776, 73313, 72286, 71342, 75614, 42776}
 local JOURNEYMAN = {43688, 16056, 67466, 60114, 60116, 51412, 22719, 16055, 59572, 26656, 60118, 60119, 48027, 22718, 59785, 59788, 22720, 22721, 22717, 22723, 22724, 64656, 59573, 39315, 34896, 68188, 68187, 39316, 34790, 63635, 63637, 63639, 63643, 17460, 23509, 63638, 35713, 49379, 23249, 34407, 65641, 23248, 35712, 35714, 65637, 23247, 17465, 17459, 63656, 65917, 55531, 60424, 16084, 29059, 66846, 63640, 23246, 66090, 41252, 22722, 17481, 39317, 34898, 63642, 23510, 63232, 66091, 68057, 23241, 43900, 23238, 23229, 23250, 65646, 23220, 23221, 23239, 65640, 23252, 68056, 23219, 65638, 23242, 23243, 23227, 33660, 35027, 65644, 24242, 65639, 42777, 23338, 23251, 65643, 47037, 35028, 46628, 23223, 23240, 23228, 23222, 49322, 39318, 34899, 63641, 65642, 15779, 54753, 39319, 65645, 34897, 17229}
 local EXPERT = {32244, 32239, 32235, 32245, 32240, 32243, 46197}
@@ -103,6 +124,15 @@ end
 -- Load once when script starts
 loadFiles()
 
+-- Utility to read itemId
+local function DecodeAPId(id)
+    local s = tostring(id)
+    local category = tonumber(s:sub(1, 2))
+    local wowId    = tonumber(s:sub(3))
+    return category, wowId
+end
+
+
 local M = {}
 
 -- Handle received items from AP
@@ -136,15 +166,14 @@ function AP_AddReceivedItem(itemId, fromPlayer, locationId)
         return
     end 
     -- Apply effect to all online players
+
+    local category, wowId = DecodeAPId(itemId)
     for _, player in pairs(GetPlayersInWorld()) do
-        if itemId == 1 then
+        if itemId == 101 then -- victory
             player:CastSpell(player, 483, true)     -- Learn visual
             player:CastSpell(player, 21249, true)   -- Blue glow burst
             player:CastSpell(player, 6619, true)    -- Sparkle swirl
-        elseif itemId == 3 then
-            XP.AddToken()
-            player:SendBroadcastMessage("|cff00FF00[AP]|r You received a Level Token!")
-        elseif itemId == 2 then
+        elseif itemId == 102 then -- gold
             if not progressiveItemTotals["Gold"] then
                 progressiveItemTotals["Gold"] = 0
             end
@@ -152,8 +181,11 @@ function AP_AddReceivedItem(itemId, fromPlayer, locationId)
             totalGold = progressiveItemTotals["Gold"]
             goldToGive = GOLD_AMOUNT[math.min(4, math.floor(totalGold / 100))]
             print("[AP-ITEMS] Granting gold")
-            player:ModifyMoney(goldToGive)
-        elseif itemId == 4 then
+            player:ModifyMoney(goldToGive)   
+        elseif itemId == 103 then -- progressive level
+            XP.AddToken()
+            player:SendBroadcastMessage("|cff00FF00[AP]|r You received a Level Cap increase!")   
+        elseif itemId == 104 then -- progressive riding
             if not progressiveItemTotals["Riding"] then
                 progressiveItemTotals["Riding"] = 0
             end
@@ -183,8 +215,8 @@ function AP_AddReceivedItem(itemId, fromPlayer, locationId)
             end
             if not totalRiding == 5 then
                 player:LearnSpell(mount)
-            end
-        elseif itemId == 5 then
+            end   
+        elseif itemId == 105 then -- random buff
             buff = BUFFS[math.random(#BUFFS)]
             print("Adding buff", buff)
             player:CastSpell(player, buff , true)
@@ -193,8 +225,8 @@ function AP_AddReceivedItem(itemId, fromPlayer, locationId)
             if pet then
                 pet:CastSpell(pet, buff , true)
                 pet:AddAura(buff, pet)
-            end
-        elseif itemId == 6 then
+            end   
+        elseif itemId == 106 then -- random debuff
             debuff = DEBUFFS[math.random(#DEBUFFS)]
             print("Adding debuff", debuff)
             print(debuff)
@@ -204,8 +236,8 @@ function AP_AddReceivedItem(itemId, fromPlayer, locationId)
                 pet:AddAura(debuff, pet)
             end
             player:CastSpell(player, debuff , true)
-            player:AddAura(debuff, player)
-        elseif itemId == 7 then
+            player:AddAura(debuff, player)  
+        elseif itemId == 107 then -- random bag
             bag = BAGS[math.random(#BAGS)]
             -- Try to add the item directly
             local added = player:AddItem(bag, 1)
@@ -228,32 +260,65 @@ function AP_AddReceivedItem(itemId, fromPlayer, locationId)
                 0, 0, 0,                      -- money, COD, delay
                 bag, 1                        -- attachments
             )
-        elseif name then
-            -- If the name exists in AP_ItemIds, it’s a spell or zone
-            -- Check if zone, should start with Unlock
-            -- Else it is a spell
-            if string.find(name, "Unlock") then
-                local zoneName = string.sub(name, 8)
-                print(zoneName)
-                print(AP_ItemIds[zoneName])
-                local zoneId = AP_ItemIds[zoneName]
-                player:SendBroadcastMessage(string.format("|cff00FFFF[AP]|r You got |cffFFFFFF%s|r!", name))
-                print(string.format("[AP-ITEMS] %s gained %s (%d)", player:GetName(), name, zoneId))
-                ZoneLock.UnlockZone(player, zoneId)
-            else
-                local spellId = AP_ItemIds[name]
-                player:LearnSpell(spellId)
-                if spellId == 1515 then
-                    player:LearnSpell(982) -- hunters need revive pet if they tame a pet so they don't softlock
-                end
-                player:SendBroadcastMessage(string.format("|cff00FFFF[AP]|r You learned |cffFFFFFF%s|r!", name))
-                print(string.format("[AP-ITEMS] %s learned spell %s (%d)", player:GetName(), name, spellId))
+            
+        elseif category == AP_CATEGORY.ZONE then
+            -- handle WoW zone
+            print("Handling Zone ID:", wowId)
+            local zoneName = GetAreaName(wowId)
+            player:SendBroadcastMessage(string.format("|cff00FFFF[AP]|r You unlocked |cffFFFFFF%s|r!", zoneName))
+            print(string.format("[AP-ITEMS] %s gained %s (%d)", player:GetName(), zoneName, wowId))
+            ZoneLock.UnlockZone(player, wowId)
+
+        elseif category == AP_CATEGORY.SPELL then
+
+            -- handle WoW spell
+            print("Handling Spell ID:", wowId)
+
+        elseif category == AP_CATEGORY.WARRIOR and player:GetClass() == 1 then
+            player:LearnSpell(wowId)
+
+        elseif category == AP_CATEGORY.DEATHKNIGHT and player:GetClass() == 6 then
+            player:LearnSpell(wowId)
+
+
+        elseif category == AP_CATEGORY.PALADIN and player:GetClass() == 2 then
+            player:LearnSpell(wowId)
+
+
+        elseif category == AP_CATEGORY.HUNTER and player:GetClass() == 3 then
+            player:LearnSpell(wowId)
+            if wowId == 1515 then
+                player:LearnSpell(982) -- hunters need revive pet if they tame a pet so they don't softlock
             end
-        -- else if zone, call the unlocker function
+
+        elseif category == AP_CATEGORY.SHAMAN and player:GetClass() == 7 then
+            player:LearnSpell(wowId)
+
+
+        elseif category == AP_CATEGORY.ROGUE and player:GetClass() == 4 then
+            player:LearnSpell(wowId)
+
+
+        elseif category == AP_CATEGORY.DRUID and player:GetClass() == 11 then
+            player:LearnSpell(wowId)
+
+
+        elseif category == AP_CATEGORY.PRIEST and player:GetClass() == 5 then
+            player:LearnSpell(wowId)
+
+
+        elseif category == AP_CATEGORY.WARLOCK and player:GetClass() == 9 then
+            player:LearnSpell(wowId)
+
+
+        elseif category == AP_CATEGORY.MAGE and player:GetClass() == 8 then
+            player:LearnSpell(wowId)
+
         else
-            print("[AP-ITEMS] Unknown item ID:", itemId)
-        player:SaveToDB()
+            -- unknown fallback
+            print("Unknown AP category:", category, "for ID:", apId)
         end
+        player:SaveToDB()
     end
 end
 

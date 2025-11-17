@@ -1,5 +1,4 @@
 local CHECKS = require("ap_checks")
-local ap_items = require("AP_ItemIds")
 local json = require("json")
 local playerDataPath = "lua_scripts/data"
 local pageSize = 20 -- spells per page
