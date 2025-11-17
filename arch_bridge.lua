@@ -152,8 +152,9 @@ end
 
 -- On logout
 local function OnLogout(event, player)
-    print("logging ouut")
-    AP.send({cmd = "Logout"})
+    if not #GetPlayersInWorld() then
+        AP.send({cmd = "Logout"})
+    end
 end
 
 

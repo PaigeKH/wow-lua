@@ -1,16 +1,5 @@
 local json = require("json")
-local itemQueueFile = "lua_scripts/ap_itemqueue.json"
-local itemQueue = {}
 local XP = require("xp_cap")
-local ITEM_IDS = {
-    [3] = "Progressive Level",
-    [2] = "Gold",
-    [5] = "Random Buff",
-    [6] = "Random Debuff",
-    [4] = "Progressive Riding",
-    [7] = "Random Bag",
-    [1] = "Victory"
-}
 local ZoneLock = require("ap_zone_lock")
 
 local seenLocations = {}
@@ -167,17 +156,7 @@ function AP_AddReceivedItem(itemId, fromPlayer, locationId)
         return
     end
 
-
-
-    local players = GetPlayersInWorld()
-    if #players == 0 then
-        print("[AP-ITEMS] No players online, queuing item:", itemId)
-        table.insert(itemQueue, itemId)
-        saveQueue()
-        return
-    end 
     -- Apply effect to all online players
-
     local category, wowId = DecodeAPId(itemId)
     for _, player in pairs(GetPlayersInWorld()) do
         -- Mark this location as seen and save

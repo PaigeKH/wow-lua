@@ -146,8 +146,8 @@ RegisterPlayerEvent(30, function(_, player)
     LoadZones(player)
     if not ZoneLock.IsZoneUnlocked(player, startingZone) then
         ZoneLock.UnlockZone(player, startingZone)
-        player:SendBroadcastMessage(string.format("[ZoneLock] Your starting zone (%d) has been unlocked.", startingZone))
-        print(string.format("[ZoneLock] Automatically unlocked starting zone %d for %s", startingZone, player:GetName()))
+        player:SendBroadcastMessage(string.format("[ZoneLock] Your starting zone %s (%d) has been unlocked.", GetAreaName(startingZone), startingZone))
+        print(string.format("[ZoneLock] Automatically unlocked starting zone %s for %s", GetAreaName(startingZone), player:GetName()))
     else
         print(string.format("[ZoneLock] %s already had starting zone %d unlocked", player:GetName(), startingZone))
     end

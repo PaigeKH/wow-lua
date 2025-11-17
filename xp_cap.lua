@@ -3,12 +3,12 @@
 
 local json = require("json")
 local XP = {}
+local expRate = 1
 XP.allowed_zones = {}
 
 XP.MAX_LEVEL = 5
 XP.tokens = 0
 XP.stored_xp = {}
-
 
 -- =========================
 -- Persistence
@@ -20,6 +20,10 @@ local function GetPathForPlayer(player)
         xp_state_file = string.format("lua_scripts/data/xp_cap%d.json", player:GetGUIDLow())
     end
     return xp_state_file
+end
+
+function XP.setRate(rate)
+    expRate = rate
 end
 
 function XP.save(player)
@@ -121,17 +125,17 @@ function XP.OnGiveXP(event, player, amount, victim)
     -- Otherwise, normal XP logic applies
     if player:GetLevel() >= XP.GetCap() then
         local stored = getStoredXP(player)
-        setStoredXP(player, stored + amount)
+        setStoredXP(player, stored + (amount*expRate))
         pet = player:GetPet()
         if pet and pet:GetLevel() < player:GetLevel() then
-            pet:GiveXP(amount)
+            pet:GiveXP(amount*expRate)
         end
         player:SendBroadcastMessage(
             string.format("[AP-XP] Stored %d XP (total stored: %d)", amount, stored + amount)
         )
         return 0
     end
-    return amount
+    return amount*expRate
 end
 
 -- =========================

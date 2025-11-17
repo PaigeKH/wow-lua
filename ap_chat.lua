@@ -40,3 +40,6 @@ AP.on("Say", function(msg)
     end
 end)
 
+RegisterPlayerEvent(42, function(event, player, command, chatHandler)
+    print(command)
+end)
