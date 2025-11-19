@@ -186,6 +186,7 @@ RegisterPlayerEvent(13, function(event, player, oldLevel)
     end
 end)
 
+
 local CHECKS = {}
 
 -- On purchasing a spell
@@ -225,11 +226,22 @@ function CHECKS.completeSpellCheck(player, spellId)
     end
 end
 
+-- On learn
+local function OnLearnSpell(event, player, spellId)
+    if spellId < 900000 then
+        RunCommand(string.format(".player unlearn %s %d", player:GetName(), spellId))
+        CHECKS.completeSpellCheck(player, spellId)
+    end
+end
+
+RegisterPlayerEvent(44, OnLearnSpell)
+
 
 -- Load data on login
 RegisterPlayerEvent(3, function(_, player)
     loadChecks(player)
 end)
+
 
 
 return CHECKS

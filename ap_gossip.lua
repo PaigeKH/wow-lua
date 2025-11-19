@@ -26,42 +26,9 @@ local function OnGossipHello(event, player, creature)
         player:GossipSendMenu(1, creature)
         log("Blocked gossip due to locked zone.")
 
-    -- Custom trainer vendor handling
-    elseif SpellVendor.IsTrainerForPlayerClass(player, creature) and ZoneLock.IsZoneUnlocked(player, zoneId) then
-        if SpellVendor and SpellVendor.OnGossipHelloForClass then
-            SpellVendor.OnGossipHelloForClass(player, creature)
-            log("Opened custom trainer vendor UI.")
-        else
-            creature:SendTrainerList(player)
-            log("Opened normal trainer list.")
-        end
-
-    -- Custom trainer vendor handling
-    elseif SpellVendor.IsRidingTrainer(creature) and ZoneLock.IsZoneUnlocked(player, zoneId) then
-        if SpellVendor and SpellVendor.OnGossipHelloForRiding then
-            SpellVendor.OnGossipHelloForRiding(player, creature)
-            log("Opened custom trainer vendor UI.")
-        else
-            creature:SendTrainerList(player)
-            log("Opened normal trainer list.")
-        end
-
     -- Default (allow quest, vendor, etc.)
     else
         return false
-    end
-end
-
--- Gossip select handler
-local function OnGossipSelect(event, player, creature, sender, intid, code)
-    print("selecting")
-    if SpellVendor.IsRidingTrainer(creature) then
-        SpellVendor.OnGossipSelectForRiding(player, creature, intid)
-        return true   
-    else
-        spellList = SpellVendor.GetSpellListForPlayer(player)
-        SpellVendor.OnGossipSelectForClass(player, creature, spellList, intid)
-        return true
     end
 end
 
@@ -72,7 +39,6 @@ for _, entry in ipairs(SpellVendor.ALL_TRAINERS or {}) do
     if not listeningOn[entry] then
         listeningOn[entry] = true
         RegisterCreatureGossipEvent(entry, 1, OnGossipHello)
-        RegisterCreatureGossipEvent(entry, 2, OnGossipSelect)
     end
 end
 

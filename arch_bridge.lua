@@ -140,7 +140,6 @@ poll()
 -- On login
 function AP.OnLogin(url, slot, password)
     print("logging in")
-
     local checkKeys = {}
     for key, _ in pairs(AP_Checks or {}) do
         table.insert(checkKeys, tonumber(key))

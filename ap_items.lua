@@ -268,45 +268,46 @@ function AP_AddReceivedItem(itemId, fromPlayer, locationId)
             -- handle WoW spell
             print("Handling Spell ID:", wowId)
 
+        spellId = wowId + 900000
         elseif category == AP_CATEGORY.WARRIOR and player:GetClass() == 1 then
-            player:LearnSpell(wowId)
+            player:LearnSpell(spellId)
 
         elseif category == AP_CATEGORY.DEATHKNIGHT and player:GetClass() == 6 then
-            player:LearnSpell(wowId)
+            player:LearnSpell(spellId)
 
 
         elseif category == AP_CATEGORY.PALADIN and player:GetClass() == 2 then
-            player:LearnSpell(wowId)
+            player:LearnSpell(spellId)
 
 
         elseif category == AP_CATEGORY.HUNTER and player:GetClass() == 3 then
-            player:LearnSpell(wowId)
+            player:LearnSpell(spellId)
             if wowId == 1515 then
                 player:LearnSpell(982) -- hunters need revive pet if they tame a pet so they don't softlock
             end
 
         elseif category == AP_CATEGORY.SHAMAN and player:GetClass() == 7 then
-            player:LearnSpell(wowId)
+            player:LearnSpell(spellId)
 
 
         elseif category == AP_CATEGORY.ROGUE and player:GetClass() == 4 then
-            player:LearnSpell(wowId)
+            player:LearnSpell(spellId)
 
 
         elseif category == AP_CATEGORY.DRUID and player:GetClass() == 11 then
-            player:LearnSpell(wowId)
+            player:LearnSpell(spellId)
 
 
         elseif category == AP_CATEGORY.PRIEST and player:GetClass() == 5 then
-            player:LearnSpell(wowId)
+            player:LearnSpell(spellId)
 
 
         elseif category == AP_CATEGORY.WARLOCK and player:GetClass() == 9 then
-            player:LearnSpell(wowId)
+            player:LearnSpell(spellId)
 
 
         elseif category == AP_CATEGORY.MAGE and player:GetClass() == 8 then
-            player:LearnSpell(wowId)
+            player:LearnSpell(spellId)
 
         else
             -- unknown fallback
