@@ -140,19 +140,4 @@ RegisterPlayerEvent(3, function(_, player)
     SendZonesToXP()
 end)
 
--- Unlock starting zone on first login
-RegisterPlayerEvent(30, function(_, player)
-    local startingZone = player:GetZoneId()
-    LoadZones(player)
-    if not ZoneLock.IsZoneUnlocked(player, startingZone) then
-        ZoneLock.UnlockZone(player, startingZone)
-        player:SendBroadcastMessage(string.format("[ZoneLock] Your starting zone %s (%d) has been unlocked.", GetAreaName(startingZone), startingZone))
-        print(string.format("[ZoneLock] Automatically unlocked starting zone %s for %s", GetAreaName(startingZone), player:GetName()))
-    else
-        print(string.format("[ZoneLock] %s already had starting zone %d unlocked", player:GetName(), startingZone))
-    end
-    SendZonesToXP() -- sync with xp_cap
-end)
-
-
 return ZoneLock

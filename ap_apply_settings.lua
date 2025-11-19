@@ -1,5 +1,6 @@
 local json = require("json")
 local XP = require("xp_cap")
+local ZoneLock = require("ap_zone_lock")
 
 local CLASS_ID_TO_NAME = {
     [1] = "WARRIOR",
@@ -129,6 +130,11 @@ local function giveStartingItems(player)
         end
     end
 
+    for _, zoneId in ipairs(settings["starting_zones"]) do
+        if not ZoneLock.IsZoneUnlocked(player, zoneId) then
+            ZoneLock.UnlockZone(player, zoneId)
+        end
+    end
 end
 
 -- Apply settings on login
