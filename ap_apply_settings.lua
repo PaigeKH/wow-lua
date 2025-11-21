@@ -59,15 +59,11 @@ local HEIRLOOMS_BY_CLASS = {
     DRUID = {armor = DRUID_HEIRLOOM_ARMOR, weapon = DRUID_HEIRLOOM_WEAPON, trinket = DRUID_HEIRLOOM_TRINKET},
 }
 
-
-
-local settingsFilePath = "lua_scripts/AP_Config.lua"
-AP_SETTINGS = {}
-
 -- loadSettings()
 local function loadSettings()
         -- XP.setRate(1)
         -- zone unlocks
+    print(settings)
     for key, value in pairs(settings) do
         print(key, value)
     end
@@ -76,14 +72,21 @@ local function loadSettings()
 end
 
 local function applySettings(player)
-    -- rate = settings.speed
-    print(player:GetSpeed(1))
-    player:SetSpeed(1, 14)
-    print(player:GetSpeed(1))
-    print(player:GetSpeed(0))
-    player:SetSpeed(0, 14)
-    print(player:GetSpeed(0))
+    print('event fired', player:GetName())
+    rate = settings.speed
+    -- Assuming 'player' and 'targetUnit' are Unit objects
+    --player:SetTarget(player)
+    -- print(player:GetTarget())
+    -- player.RunCommand(player, string.format('/target %s', player:GetName()))
+    -- player.RunCommand(string.format('.target Fi))
+    local restedRunSpeed = 60.0
 
+    local convertedRestedRunSpeed = 1 + (restedRunSpeed / 100)
+    player:SetSpeed(1, convertedRestedRunSpeed, true)  -- Increase run speed when entering a resting zone
+
+    -- player.RunCommand(string.format('.modify speed %d', rate))
+    -- local convertedRestedRunSpeed = 1 + (rate / 10)
+    -- player:SetSpeed(1, convertedRestedRunSpeed, true)  -- Increase run speed when entering a resting zone
 end
 
 local function giveStartingItem(item, player)
@@ -129,6 +132,9 @@ local function giveStartingItems(player)
             giveStartingItem(value, player)
         end
     end
+    if settings.starting_money then
+        player:ModifyMoney(settings.starting_money)
+    end
 
     for _, zoneId in ipairs(settings["starting_zones"]) do
         if not ZoneLock.IsZoneUnlocked(player, zoneId) then
@@ -137,9 +143,17 @@ local function giveStartingItems(player)
     end
 end
 
--- Apply settings on login
-RegisterPlayerEvent(3, function(_, player)
-    applySettings(player)
+-- Apply speed boost to enemy when combat starts
+RegisterPlayerEvent(33, function(_, player, enemy)
+    local rate = 1 + (settings.speed / 10)
+    enemy:SetSpeed(1, rate, true)
+end)
+
+
+-- Apply speed boost to player on login
+RegisterPlayerEvent(34, function(_, player)
+    local rate = 1 + (settings.speed / 10)
+    player:SetSpeed(1, rate, true)
 end)
 
 -- Give items on first login
