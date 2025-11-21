@@ -71,24 +71,6 @@ local function loadSettings()
     XP.setRate(rate)
 end
 
-local function applySettings(player)
-    print('event fired', player:GetName())
-    rate = settings.speed
-    -- Assuming 'player' and 'targetUnit' are Unit objects
-    --player:SetTarget(player)
-    -- print(player:GetTarget())
-    -- player.RunCommand(player, string.format('/target %s', player:GetName()))
-    -- player.RunCommand(string.format('.target Fi))
-    local restedRunSpeed = 60.0
-
-    local convertedRestedRunSpeed = 1 + (restedRunSpeed / 100)
-    player:SetSpeed(1, convertedRestedRunSpeed, true)  -- Increase run speed when entering a resting zone
-
-    -- player.RunCommand(string.format('.modify speed %d', rate))
-    -- local convertedRestedRunSpeed = 1 + (rate / 10)
-    -- player:SetSpeed(1, convertedRestedRunSpeed, true)  -- Increase run speed when entering a resting zone
-end
-
 local function giveStartingItem(item, player)
     local added = player:AddItem(item, 1)
 
