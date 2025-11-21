@@ -162,6 +162,7 @@ function AP_AddReceivedItem(itemId, fromPlayer, locationId)
         -- Mark this location as seen and save
         seenLocations[tostring(locationId)] = true
         saveToFile(player)
+        local spellId = wowId + 900000
 
         if itemId == 101 then -- victory
             player:CastSpell(player, 483, true)     -- Learn visual
@@ -268,7 +269,6 @@ function AP_AddReceivedItem(itemId, fromPlayer, locationId)
             -- handle WoW spell
             print("Handling Spell ID:", wowId)
 
-        spellId = wowId + 900000
         elseif category == AP_CATEGORY.WARRIOR and player:GetClass() == 1 then
             player:LearnSpell(spellId)
 
@@ -283,7 +283,7 @@ function AP_AddReceivedItem(itemId, fromPlayer, locationId)
         elseif category == AP_CATEGORY.HUNTER and player:GetClass() == 3 then
             player:LearnSpell(spellId)
             if wowId == 1515 then
-                player:LearnSpell(982) -- hunters need revive pet if they tame a pet so they don't softlock
+                player:LearnSpell(900000 + 982) -- hunters need revive pet if they tame a pet so they don't softlock
             end
 
         elseif category == AP_CATEGORY.SHAMAN and player:GetClass() == 7 then

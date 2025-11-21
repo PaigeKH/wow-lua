@@ -131,7 +131,7 @@ function XP.OnGiveXP(event, player, amount, victim)
             pet:GiveXP(amount*expRate)
         end
         player:SendBroadcastMessage(
-            string.format("[AP-XP] Stored %d XP (total stored: %d)", amount, stored + amount)
+            string.format("[AP-XP] Stored %d XP (total stored: %d)", expRate*amount, stored + (expRate*amount))
         )
         return 0
     end
